@@ -54,7 +54,7 @@ python app.py
 ```bash
 cd backend
 python simulate_alert.py
-////
+```
 
 **Tác giả:** Đặng Trung Kiên (MSSV: 20233473)
 **Trường:** Đại học Bách Khoa Hà Nội - Viện Điện - Điện tử.
