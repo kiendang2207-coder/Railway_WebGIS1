@@ -1,15 +1,15 @@
-# 🚂 Railway WebGIS Monitoring System
+# Railway WebGIS Monitoring System
 
 Hệ thống cảnh báo và quản lý đường sắt trực tuyến sử dụng công nghệ Bản đồ số (WebGIS).
 Đồ án tập trung vào việc số hóa hạ tầng mạng lưới đường sắt (nhà ga, đường ray) và cảnh báo các sự cố khẩn cấp (cháy nổ, sạt lở) theo thời gian thực (Real-time).
 
-## 🛠 Công nghệ sử dụng
+## Công nghệ sử dụng
 - **Frontend:** HTML, CSS, JavaScript, LeafletJS (WebGIS).
 - **Backend:** Python, Flask, Flask-SocketIO (WebSockets).
 - **Cơ sở dữ liệu:** PostgreSQL kết hợp thư viện không gian PostGIS (GeoAlchemy2).
 - **Mô phỏng (Simulator):** Script Python tự động sinh các cảnh báo sự cố IoT.
 
-## 📂 Cấu trúc thư mục
+## Cấu trúc thư mục
 - `/backend/`: Chứa mã nguồn máy chủ API và WebSockets.
   - `app.py`: Khởi chạy Web Server Flask.
   - `routes.py`: Xử lý API cấp phát dữ liệu bản đồ.
@@ -21,7 +21,7 @@ Hệ thống cảnh báo và quản lý đường sắt trực tuyến sử dụ
 - `/database/`: Chứa các script SQL khởi tạo.
   - `init_db.sql`: Dữ liệu không gian (tọa độ các nhà ga phía Bắc).
 
-## 🚀 Hướng dẫn Cài đặt & Chạy dự án
+## Hướng dẫn Cài đặt & Chạy dự án
 
 ### 1. Yêu cầu hệ thống
 - Python 3.8+
@@ -54,9 +54,5 @@ python app.py
 ```bash
 cd backend
 python simulate_alert.py
-```
-*(Bạn sẽ thấy còi báo cháy và bản đồ tự động nhấp nháy ngay khi tool này hoạt động).*
-
----
 **Tác giả:** Đặng Trung Kiên (MSSV: 20233473)
 **Trường:** Đại học Bách Khoa Hà Nội - Viện Điện - Điện tử.
