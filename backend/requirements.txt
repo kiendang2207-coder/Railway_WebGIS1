@@ -1,0 +1,9 @@
+Flask==3.0.3
+Flask-SocketIO==5.3.6
+Flask-CORS==4.0.1
+Flask-SQLAlchemy==3.1.1
+pg8000
+GeoAlchemy2==0.14.7
+requests==2.31.0
+eventlet==0.36.1
+python-dotenv

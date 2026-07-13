@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang Quản trị Hệ thống</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; background-color: #f8f9fa; }
+        .container { max-width: 1100px; margin: auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        h1, h2 { color: #343a40; }
+        
+        .nav-link { display: inline-block; margin-bottom: 20px; text-decoration: none; color: #007bff; font-weight: bold; }
+        .nav-link:hover { text-decoration: underline; }
+
+        /* Bảng danh sách */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        th, td { padding: 12px 15px; border-bottom: 1px solid #dee2e6; text-align: left; }
+        th { background-color: #343a40; color: white; font-weight: 500; }
+        tr:hover { background-color: #f8f9fa; }
+        
+        /* Form thêm mới */
+        .form-card { background: #e9ecef; padding: 20px; border-radius: 8px; margin-bottom: 30px; border-left: 5px solid #007bff; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #495057; }
+        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 4px; box-sizing: border-box; }
+        
+        /* Nút bấm */
+        .btn { padding: 10px 15px; border: none; cursor: pointer; border-radius: 4px; color: white; font-weight: bold; font-size: 14px; transition: 0.2s;}
+        .btn:hover { opacity: 0.9; }
+        .btn-success { background-color: #28a745; }
+        .btn-danger { background-color: #dc3545; }
+        
+        .status-select { padding: 6px; border-radius: 4px; border: 1px solid #aaa; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="nav-link">⬅ Quay lại Bản đồ trực tuyến</a>
+        <h1>Quản trị Hệ thống Cảnh báo Đường sắt</h1>
+        
+        <div class="form-card">
+            <h2>➕ Tạo cảnh báo thủ công</h2>
+            <div class="form-group">
+                <label>Thiết bị phát hiện (ID thiết bị - 1, 2 hoặc 3):</label>
+                <input type="number" id="device_id" value="1" min="1" max="3">
+            </div>
+            <div class="form-group">
+                <label>Loại sự cố:</label>
+                <input type="text" id="alert_type" placeholder="VD: Vật cản trên đường ray, Động đất...">
+            </div>
+            <div class="form-group">
+                <label>Mức độ nghiêm trọng:</label>
+                <select id="severity">
+                    <option>Thấp</option>
+                    <option>Trung bình</option>
+                    <option>Cao</option>
+                    <option style="color:red; font-weight:bold;">Nghiêm trọng</option>
+                </select>
+            </div>
+            <button class="btn btn-success" onclick="addAlert()">Gửi Cảnh Báo Lên Hệ Thống</button>
+        </div>
+
+        <h2>📋 Danh sách toàn bộ cảnh báo</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Mã ID</th>
+                    <th>Thiết bị / Vị trí</th>
+                    <th>Loại sự cố</th>
+                    <th>Mức độ</th>
+                    <th>Thời gian tạo</th>
+                    <th>Cập nhật trạng thái</th>
+                    <th>Xóa</th>
+                </tr>
+            </thead>
+            <tbody id="alert-list">
+                <tr><td colspan="7" style="text-align:center;">Đang tải dữ liệu...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Hàm gọi API lấy dữ liệu cảnh báo từ database
+        function loadAlerts() {
+            fetch('/api/alerts')
+                .then(res => res.json())
+                .then(data => {
+                    const tbody = document.getElementById('alert-list');
+                    tbody.innerHTML = '';
+                    
+                    if(data.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Chưa có dữ liệu cảnh báo nào.</td></tr>';
+                        return;
+                    }
+
+                    data.forEach(alert => {
+                        tbody.innerHTML += `
+                            <tr>
+                                <td>#${alert.id}</td>
+                                <td><b>${alert.device_name}</b><br><small>ID: ${alert.device_id}</small></td>
+                                <td>${alert.alert_type}</td>
+                                <td>
+                                    <span style="color: ${alert.severity === 'Nghiêm trọng' ? 'red' : 'black'}; font-weight: ${alert.severity === 'Nghiêm trọng' ? 'bold' : 'normal'}">
+                                        ${alert.severity}
+                                    </span>
+                                </td>
+                                <td>${alert.created_at}</td>
+                                <td>
+                                    <select class="status-select" onchange="updateStatus(${alert.id}, this.value)">
+                                        <option value="Mới" ${alert.status === 'Mới' ? 'selected' : ''}>Mới tiếp nhận</option>
+                                        <option value="Đang xử lý" ${alert.status === 'Đang xử lý' ? 'selected' : ''}>Đang xử lý / Khắc phục</option>
+                                        <option value="Đã giải quyết" ${alert.status === 'Đã giải quyết' ? 'selected' : ''}>Đã giải quyết xong</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <button class="btn btn-danger" onclick="deleteAlert(${alert.id})">Xóa</button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                })
+                .catch(err => alert('Lỗi kết nối tới server!'));
+        }
+
+        // Hàm gọi API POST để thêm cảnh báo
+        function addAlert() {
+            const data = {
+                device_id: document.getElementById('device_id').value,
+                alert_type: document.getElementById('alert_type').value,
+                severity: document.getElementById('severity').value
+            };
+            
+            if(!data.alert_type) {
+                alert("Vui lòng nhập loại sự cố!"); return;
+            }
+
+            fetch('/api/alerts', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            }).then(res => {
+                if(res.ok) {
+                    alert('Đã gửi cảnh báo thành công!');
+                    document.getElementById('alert_type').value = ''; // Xóa form
+                    loadAlerts(); // Tải lại bảng để cập nhật
+                }
+            });
+        }
+
+        // Hàm gọi API PUT cập nhật trạng thái
+        function updateStatus(id, newStatus) {
+            fetch(`/api/alerts/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: newStatus })
+            }).then(res => {
+                if(res.ok) {
+                    alert('Đã cập nhật trạng thái thành công!');
+                }
+            });
+        }
+
+        // Hàm gọi API DELETE xóa cảnh báo
+        function deleteAlert(id) {
+            if(confirm('Bạn có chắc chắn muốn xóa cảnh báo này khỏi lịch sử không? Hành động này không thể hoàn tác.')) {
+                fetch(`/api/alerts/${id}`, { method: 'DELETE' })
+                    .then(() => loadAlerts());
+            }
+        }
+
+        // Tự động tải danh sách khi vừa mở trang
+        loadAlerts();
+        
+        // Cứ mỗi 5 giây tải lại bảng 1 lần để cập nhật tự động
+        setInterval(loadAlerts, 5000);
+    </script>
+</body>
+</html>
