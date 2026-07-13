@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request, render_template
+from flask import Blueprint, jsonify, request, render_template, send_from_directory
 from models import db, Railway, Station, WarningDevice, Alert
 from socket_events import socketio
 import os
@@ -10,7 +10,7 @@ web = Blueprint('web', __name__)
 # --- WEB ROUTES (Giao diện) ---
 @web.route('/')
 def index():
-    return render_template('index.html')
+    return send_from_directory('../frontend', 'index.html')
 
 # --- API ROUTES (Cung cấp dữ liệu) ---
 from sqlalchemy import func
